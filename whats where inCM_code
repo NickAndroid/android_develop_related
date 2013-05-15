@@ -1,0 +1,52 @@
+	About the directories...
+Quote:
+Originally Posted by kirdroid View Post
+On my Ubuntu VM using 4 CPU's and 2GB ram, it took around hour. I have retina mbp with 16 gigs ram. I will probably increase the ram on my VM to 4 gigs and see if any improvements in build time.
+
+Sent from my Nexus 7 using Tapatalk 2
+
+---------- Post added at 06:39 PM ---------- Previous post was at 06:18 PM ----------
+
+@fattire - How do I start looking at the CM source? I want to look at some code and try to understand. Is there some kind of tutorial on where to start for looking at the CM source?
+Yeah, so a newer computer is definitely going to give you an advantage over an older one...
+
+As for the cm source-- each of the main directories has different stuff in it.. here are just a few off the top of my head to get you started. The description is fairly flippant and incomplete and perhaps inaccurate, and I'm going to skip some directories because it'll get unwieldy (and I don't know necessarily what every directory does), but it's just to give you a vague idea of some of the more important folders...
+
+Again, I typed this quickly, so it's probably not as well said as it could be.
+
+/bionic -- bionic is the Android mobile-friendly version of libc. You generally don't need to touch anything in here. Lots of cpu-specific stuff and better not to stick your nose in here, although Linaro did manage to speed up performance on some devices by tweaking various things...
+
+/build -- the scripts and various files that are used for the actual build process. Take a look in here if you're curious what steps are taken to make all the parts of Android compile, as well as various "make" commands. (Some of the flags used for compiling have been further enhanced by CyanogenMod for Google non-supported platforms.) Some familiarity with GNU make and the Makefile build system are helpful. There's also documentation here and here.
+
+/bootable -- among other things, the source for clockworkmod recovery is in here.
+
+/dalvik -- this is the virtual machine that runs the java apps. It's how you can write an app and it'll run on any android machine, regardless of the underlying architecture.
+
+/device -- all (okay, most of) the stuff that's particular to a unique device (a particular model of phone or tablet) is in the /device folder and is organized by /device/manufacturer/model. So the Nexus 7 is in device/asus/grouper, the NookColor is in device/bn/encore, the Nook Tablet is in device/bn/acclaim, the HP Touchpad is in device/hp/tenderloin, etc. If you want to do a port of Android for a particular device that currently has no source, you should probably start by finding a similar device (with a similar underlying platform) and use it as a "base" for modifying for that device. Do take a peek into device/asus/grouper to see the various files that are used to build for the Nexus 7 and compare with other devices. I could talk at length about just this folder-- xml files in device/hp/tenderloin/overlay, for example, will override system-wide settings in the frameworks folder, so you can customize Android to behave differently for this device than for any other...
+
+/docs -- I've honestly never even looked in here before, but it looks like there may be more documentation on how stuff works. Jeesh i wish I knew about this before :P Read docs/source.android.com/README for instructions on how to make a directory full of .html docs that I haven't read.
+
+/external -- this is where non-android specific utilities go. Lots of the stuff in here are just regular open source projects that are used by Android (or CM10) and just have the Android.mk make files to work with the Android build system.
+
+/frameworks -- this refers to the Android java frameworks. It's the stuff that makes Android, Android. The frameworks contain the Android user experience and the abstracted "hooks" that programmers use to build Android apps. So, for example, this folder contains the Java windows-manipulation and activity stuff and java sound support and Android graphics layers and Android media stuff and UI as well as services and basically the Android API in general. There are also some platform-specific optimization here as well that CyanogenMod adds for Qualcomm, OMAP, and other manufacturers to get the best performance out of specific architectures. This folder has many different parts, but if you want to play with the Android platform itself and its basic functionality, this is probably the place to look. Some of the .xml configuration and string files here may be overridden in the device/manufacturer/model/overlay section of the device.
+
+/hardware -- lots of platform/hardware-specific libraries and such go in this folder. For example, the stuff in hardware/ti is used to support devices by Texas Instruments. There are folders for qualcomm devices, stuff for the radio interface layer (used by the phone), and the libhardware folder and more is here. If you're just starting to tinker with Android itself, you probably don't wanna mess with this.
+
+/kernel -- like the device folder, the kernel folder is organized like kernel/manufacturer/device and inside there you'll find the source for the kernel. This source may be downloaded "on the fly" by the cyanogenmod build system.
+
+/ndk -- See here. Tools for allowing cross-platform C code to be included in Android apps (as JNI shared libraries, apparently). Used if you're writing C-based apps, but I've never used any of this or even poked my nose in there. See ndk/docs/OVERVIEW.html for more.
+
+/out -- the output of your build will go in here. When you type cd $OUT after building, you're actually getting a shortcut to out/target/product/devicename. This is the only folder that should have stuff added to it (or changed) when you're doing a build. stuff that will become the system folder on your device goes in system. Stuff that will become your ramdisk goes in root. The various stages and temporary scripts used to create your recovery.img and boot.img and your kernel go here as well. The object files get built into the obj directory. And there are generic compiler tools and other build (such as from the ndk) and such that get built in /out as well. When you do a make clobber, you're just getting rid of whatever's in /out
+
+/packages -- packages/apps is where Android standalone apps, such as the Settings app, the Browser, the Launcher (in CM10's case it's called Trebuchet), and other apps go. Note that many of these apps are integrated directly with functionality within the /frameworks directory. So the settings changed in the Settings app will correlate to stuff in the frameworks folder. Non-app packages such as input methods and wallpapers go here as well.
+
+/prebuilt (and /prebuilts) -- these folders contain prebuilt toolchains for cross-compiling on linux and darwin (os x) and other specific OSes. If I'm not mistaken, CyanogenMod adds the prebuilts directory with newer compilers. Cross-compiling allows you to build Android for another architecture (such as ARM-based CPU) from a totally different computer (such as Intel).
+
+/system -- lower-level linuxy system stuff such as netd, fastboot support, the shell, etc. are here. I'm not sure when something is promoted from /external to /system, but maybe more essential stuff goes here. Or maybe someone else can fill me in on this.
+
+/vendor -- the vendor folder contains stuff particular to a vendor build such as cm. It's also the place where proprietary blobs are extracted from the device, again using the same manufacturer/device convention as in the device folder.
+
+This is seriously all just typed off the cuff, without really much thought. It's certainly an incomplete description. The best way to discover what to play with is just to start exploring, changing stuff, and building. The directory names are usually indicitive of what you'll find inside, and the best source of documentation is the code itself.
+
+Good luck! I do invite anyone with corrections and additional insight/notes to let me know and I'll try to update the above.
+ft 
